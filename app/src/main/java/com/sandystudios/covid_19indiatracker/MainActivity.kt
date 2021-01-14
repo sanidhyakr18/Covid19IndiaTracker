@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.AbsListView
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
@@ -29,6 +30,22 @@ class MainActivity : AppCompatActivity() {
         list.addHeaderView(LayoutInflater.from(this).inflate(R.layout.list_header, list, false))
 
         fetchResults()
+        swipeToRefresh.setOnRefreshListener {
+            fetchResults()
+        }
+        list.setOnScrollListener(object : AbsListView.OnScrollListener {
+            override fun onScrollStateChanged(view: AbsListView, scrollState: Int) {}
+            override fun onScroll(
+                view: AbsListView,
+                firstVisibleItem: Int,
+                visibleItemCount: Int,
+                totalItemCount: Int
+            ) {
+                if (list.getChildAt(0) != null) {
+                    swipeToRefresh.isEnabled = list.firstVisiblePosition == 0 && list.getChildAt(0).top == 0
+                }
+            }
+        })
     }
 
     private fun fetchResults() {
