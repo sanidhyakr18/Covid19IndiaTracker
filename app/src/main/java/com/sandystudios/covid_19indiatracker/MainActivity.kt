@@ -2,7 +2,7 @@ package com.sandystudios.covid_19indiatracker
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
 import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_main.*
@@ -16,12 +16,17 @@ import java.util.*
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
+
+    lateinit var stateListAdapter: StateListAdapter
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         window.statusBarColor = resources.getColor(R.color.white)
         val view: View = window.decorView
         view.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+
+        list.addHeaderView(LayoutInflater.from(this).inflate(R.layout.list_header, list, false))
 
         fetchResults()
     }
@@ -34,10 +39,15 @@ class MainActivity : AppCompatActivity() {
                 val data = Gson().fromJson(response.body?.string(), Response::class.java)
                 launch(Dispatchers.Main) {
                     bindCombinedData(data.statewise[0])
-//                    bindStateWiseData(data.statewise.subList(0, data.statewise.size))
+                    bindStateWiseData(data.statewise.subList(1, data.statewise.size))
                 }
             }
         }
+    }
+
+    private fun bindStateWiseData(subList: List<StatewiseItem>) {
+        stateListAdapter = StateListAdapter(subList)
+        list.adapter = stateListAdapter
     }
 
     private fun bindCombinedData(data: StatewiseItem) {
