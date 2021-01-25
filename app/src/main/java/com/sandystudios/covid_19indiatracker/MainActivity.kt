@@ -42,7 +42,8 @@ class MainActivity : AppCompatActivity() {
                 totalItemCount: Int
             ) {
                 if (list.getChildAt(0) != null) {
-                    swipeToRefresh.isEnabled = list.firstVisiblePosition == 0 && list.getChildAt(0).top == 0
+                    swipeToRefresh.isEnabled =
+                        list.firstVisiblePosition == 0 && list.getChildAt(0).top == 0
                 }
             }
         })
@@ -56,7 +57,7 @@ class MainActivity : AppCompatActivity() {
                 val data = Gson().fromJson(response.body?.string(), Response::class.java)
                 launch(Dispatchers.Main) {
                     bindCombinedData(data.statewise[0])
-                    bindStateWiseData(data.statewise.subList(1, data.statewise.size))
+                    bindStateWiseData(data.statewise.subList(0, data.statewise.size))
                 }
             }
         }
@@ -71,36 +72,35 @@ class MainActivity : AppCompatActivity() {
         val lastUpdatedTime = data.lastupdatedtime
         val myFormat = "dd/MM/yyyy hh:mm:ss"
         val simpleDateFormat = SimpleDateFormat(myFormat, Locale.getDefault())
-        lastUpdatedTv.text = "Last Updated\n ${getTimeAgo(
-            simpleDateFormat.parse(lastUpdatedTime)
-        )}"
+        val getTimeAgo = getTimeAgo(simpleDateFormat.parse(lastUpdatedTime))
+        lastUpdatedTv.text = "Last Updated\n $getTimeAgo"
 
         confirmedTv.text = NumberFormat.getIntegerInstance().format(Integer.valueOf(data.confirmed))
         activeTv.text = NumberFormat.getIntegerInstance().format(Integer.valueOf(data.active))
         recoveredTv.text = NumberFormat.getIntegerInstance().format(Integer.valueOf(data.recovered))
         deceasedTv.text = NumberFormat.getIntegerInstance().format(Integer.valueOf(data.deaths))
     }
+}
 
-    fun getTimeAgo(past: Date): String {
-        val now = Date()
-        val seconds = TimeUnit.MILLISECONDS.toSeconds(now.time - past.time)
-        val minutes = TimeUnit.MILLISECONDS.toMinutes(now.time - past.time)
-        val hours = TimeUnit.MILLISECONDS.toHours(now.time - past.time)
+fun getTimeAgo(past: Date): String {
+    val now = Date()
+    val seconds = TimeUnit.MILLISECONDS.toSeconds(now.time - past.time)
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(now.time - past.time)
+    val hours = TimeUnit.MILLISECONDS.toHours(now.time - past.time)
 
-        return when {
-            seconds < 60 -> {
-                "Few seconds ago"
-            }
-            minutes < 60 -> {
-                "$minutes minutes ago"
-            }
-            hours < 24 -> {
-                "$hours hour ${minutes % 60} min ago"
-            }
-            else -> {
-                val myFormat = "dd/MM/yyyy hh:mm:ss"
-                SimpleDateFormat(myFormat, Locale.getDefault()).format(past).toString()
-            }
+    return when {
+        seconds < 60 -> {
+            "Few seconds ago"
+        }
+        minutes < 60 -> {
+            "$minutes minutes ago"
+        }
+        hours < 24 -> {
+            "$hours hour ${minutes % 60} min ago"
+        }
+        else -> {
+            val myFormat = "dd/MM/yyyy hh:mm:ss"
+            SimpleDateFormat(myFormat, Locale.getDefault()).format(past).toString()
         }
     }
 }
